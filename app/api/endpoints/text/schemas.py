@@ -48,7 +48,7 @@ class StatCreate(StatBase):
 
 
 class StatUpdate(StatBase):
-    pass
+    value: Optional[float]
 
 
 class TextBase(BaseSchema):

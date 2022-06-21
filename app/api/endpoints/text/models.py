@@ -1,6 +1,6 @@
-from sqlalchemy import Column, String, Float, Integer, ForeignKey, Enum as SQLAlchemyEnum
+from sqlalchemy import Column, String, Float, ForeignKey, Enum as SQLAlchemyEnum
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship
-from sqlalchemy_utils import JSONType
 
 from app.api.endpoints.text.schemas import StatValueEnum, LangEnum
 from app.db.models import TimeStampMixin
@@ -19,7 +19,7 @@ class Text(Base, TimeStampMixin):
 class Stat(Base):
     name = Column(SQLAlchemyEnum(StatValueEnum))
     value = Column(Float)
-    argument = Column(JSONType, nullable=True)
+    argument = Column(JSON, nullable=True)
     lang = Column(SQLAlchemyEnum(LangEnum), default=LangEnum.en)
 
     text_id = Column(String, ForeignKey("text.id", ondelete="CASCADE"))

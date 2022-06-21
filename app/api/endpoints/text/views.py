@@ -7,8 +7,9 @@ from app.db.session import get_db
 
 from .deps import check_files_path, validate_content_type
 from .crud import text as crud_text
-from .services import save_stats, save_file
+from .services import save_file
 from .schemas import TextBase, TextRead, TextStats, StatArgument
+from .tasks import save_stats_task
 
 router = APIRouter()
 
@@ -51,7 +52,7 @@ def get_stats(
 
 @router.post(
     "/{TextID}",
-    response_model=TextStats,
+    response_model=TextBase,
     dependencies=[Depends(check_files_path)],
 )
 async def save_text_stats(
@@ -66,6 +67,6 @@ async def save_text_stats(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Text does not exist.",
         )
-    for argument in arguments:
-        save_stats(db=db, text_id=text_id, arguments=argument.dict())
+    regular_arguments = [arg.dict() for arg in arguments]
+    save_stats_task(text_id=text_id, arguments=regular_arguments)
     return text_db
