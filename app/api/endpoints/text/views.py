@@ -1,15 +1,14 @@
 from typing import List
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile, Path, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, Path, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 
 from .deps import check_files_path, validate_content_type
 from .crud import text as crud_text
-from .services import upload_file, create, save_stats
+from .services import save_stats, save_file
 from .schemas import TextBase, TextRead, TextStats, StatArgument
-from .utils import generate_internal_name
 
 router = APIRouter()
 
@@ -21,11 +20,9 @@ router = APIRouter()
 )
 async def upload_text(
         db: Session = Depends(get_db),
-        text: UploadFile = Depends(validate_content_type),
+        file: UploadFile = Depends(validate_content_type),
 ):
-    internal_name = generate_internal_name()
-    text_db = create(db=db, file=text, internal_name=internal_name)
-    await upload_file(file=text, internal_name=internal_name)
+    text_db = save_file(db=db, file=file)
     return text_db
 
 

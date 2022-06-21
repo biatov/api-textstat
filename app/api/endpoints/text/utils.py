@@ -28,6 +28,14 @@ def read_file(path: str) -> str:
         return ""
 
 
+def upload_file(path: str, content: str) -> None:
+    try:
+        with open(path, "w") as file:
+            file.write(content)
+    except (FileNotFoundError, OSError):
+        return None
+
+
 def get_text_path(db: Session, text_id: str) -> str:
     text_db: Text = text.get(db=db, id=text_id)
     if not text_db:

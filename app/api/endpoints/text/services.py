@@ -1,6 +1,5 @@
-from typing import Optional, Union
+from typing import Union
 
-import aiofiles
 import textstat
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
@@ -8,31 +7,26 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 
 from .crud import text, stat
-from .utils import get_file_extension, read_text
+from .utils import generate_internal_name, get_file_extension, read_text
 from .schemas import TextCreate, TextBase, StatCreate, StatValueEnum, StatArgumentParam, LangEnum
+from .tasks import upload_file_task
 
 
-async def upload_file(
-        file: UploadFile,
-        internal_name: str,
-        path: Optional[str] = settings.FILE_OUT_PATH,
-        chunk_size: Optional[int] = settings.FILE_CHUNK_SIZE,
-) -> None:
+def save_file(db: Session, file: UploadFile) -> TextBase:
+    internal_name = generate_internal_name()
     extension = get_file_extension(file.filename)
-    async with aiofiles.open(f"{path}/{internal_name}.{extension}", "wb") as out_file:
-        while content := await file.read(chunk_size):
-            await out_file.write(content)
-
-
-def create(db: Session, file: UploadFile, internal_name: str) -> TextBase:
     text_in = TextCreate(
-        name=file.filename,
         id=internal_name,
+        name=file.filename,
         content_type=file.content_type,
-        extension=get_file_extension(file.filename),
+        extension=extension,
     )
-    text.create(db=db, obj_in=text_in)
-    return TextBase(id=text_in.id)
+    text_db = text.create(db=db, obj_in=text_in)
+
+    path = f"{settings.FILE_OUT_PATH}/{internal_name}.{extension}"
+    content = file.file.read().decode()
+    upload_file_task(path=path, content=content)
+    return text_db
 
 
 def save_stats(db: Session, text_id: str, arguments: dict) -> None:

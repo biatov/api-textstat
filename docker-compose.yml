@@ -49,17 +49,32 @@ services:
       - app
     env_file: .env
 
-#  rabbitmq:
-#      image: rabbitmq:latest
-#      hostname: rabbitmq
-#      restart: "always"
-#      networks:
-#        - textstat
-#      depends_on:
-#        - app
-#      ports:
-#        - ${RABBITMQ_PORT}:${RABBITMQ_PORT}
-#      env_file: .app.env
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: textstat-rabbitmq
+    hostname: rabbitmq
+    restart: "always"
+    networks:
+      - textstat
+    depends_on:
+      - app
+    ports:
+      - ${RABBITMQ_PORT}:${RABBITMQ_PORT}
+    env_file: .env
+
+  celery:
+    image: ${SERVICE_IMAGE}
+    container_name: textstat-celery
+    hostname: celery
+    restart: "always"
+    entrypoint: sh ./scripts/celery.sh
+    networks:
+      - textstat
+    depends_on:
+      - rabbitmq
+    volumes:
+      - files:/var/app/files
+    env_file: .env
 
 networks:
   textstat:

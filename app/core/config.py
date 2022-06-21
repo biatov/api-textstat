@@ -53,11 +53,19 @@ class Settings(BaseSettings):
 
     # FILE_CONTENT_TYPES: str = "text/plain"
     FILE_CONTENT_TYPES: Union[List[str], str] = ["text/plain"]
-    # chunk size async for reading files
-    FILE_CHUNK_SIZE: int = 2048
     FILE_OUT_PATH: str = os.path.abspath("files")
 
     _assemble_file_types = validator("FILE_CONTENT_TYPES", allow_reuse=True)(assemble_value)
+
+    CELERY_TASK_TRACK_STARTED: bool = True
+    CELERY_MAIN_QUEUE: str = "main-queue"
+    CELERY_BROKER_URL: str = "amqp://guest:guest@rabbitmq:5672//"
+    CELERY_ACCEPT_CONTENT: Union[List[str], str] = ["application/json"]
+    CELERY_TASK_SERIALIZER: str = "json"
+    CREATE_TASKS: bool = True
+
+    _assemble_accept_content = validator("CELERY_ACCEPT_CONTENT", allow_reuse=True)(assemble_value)
+
 
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
