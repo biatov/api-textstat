@@ -1,0 +1,26 @@
+from sqlalchemy import Column, String, Float, Integer, ForeignKey, Enum as SQLAlchemyEnum
+from sqlalchemy.orm import relationship
+from sqlalchemy_utils import JSONType
+
+from app.api.endpoints.text.schemas import StatValueEnum, LangEnum
+from app.db.models import TimeStampMixin
+from app.db.base import Base
+
+
+class Text(Base, TimeStampMixin):
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, nullable=False, index=True)
+    content_type = Column(String, nullable=True)
+    extension = Column(String, nullable=False)
+
+    stats = relationship("Stat", back_populates="text")
+
+
+class Stat(Base):
+    name = Column(SQLAlchemyEnum(StatValueEnum))
+    value = Column(Float)
+    argument = Column(JSONType, nullable=True)
+    lang = Column(SQLAlchemyEnum(LangEnum), default=LangEnum.en)
+
+    text_id = Column(String, ForeignKey("text.id", ondelete="CASCADE"))
+    text = relationship("Text", back_populates="stats")

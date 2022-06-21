@@ -1,0 +1,57 @@
+upstream backends {
+    server ${BACKEND}:${BACKEND_PORT} max_fails=0;
+    keepalive  4;
+}
+
+tcp_nopush     on;
+tcp_nodelay    on;
+server_names_hash_bucket_size  128;
+
+log_format nhc 'addr:$remote_addr ($http_x_forwarded_for) user:$remote_user ts:[$time_local] msec:[$msec] req:$request_time up:$upstream_response_time backend:$upstream_addr '
+               'host:$host url:"$request" status:$status size:$bytes_sent '
+               'ref:"$http_referer" ua:"$http_user_agent" gzip:"$gzip_ratio" http_cookie:"$http_cookie"';
+
+server {
+    listen ${PORT} default_server;
+    server_name ${HOST};
+    underscores_in_headers on;
+    gzip  on;
+    gzip_buffers 16 8k;
+    gzip_comp_level 1;
+    gzip_http_version 1.1;
+    gzip_min_length 256;
+    gzip_proxied any;
+    gzip_vary on;
+    gzip_types
+        text/xml application/xml application/atom+xml application/rss+xml application/xhtml+xml image/svg+xml
+        text/javascript application/javascript application/x-javascript
+        text/x-json application/json application/x-web-app-manifest+json
+        text/css text/plain text/x-component
+        font/opentype application/x-font-ttf application/vnd.ms-fontobject
+        image/x-icon;
+    gzip_disable  "msie6";
+
+    client_max_body_size 50M;
+    client_body_timeout 30;
+
+    location = /robots.txt {
+        access_log off;
+        return 200 'User-agent: *\nDisallow: /';
+    }
+
+    location / {
+        proxy_pass http://backends;
+        proxy_redirect off;
+        proxy_set_header  Host              $host;
+        proxy_set_header  X-Real-IP         $remote_addr;
+        proxy_set_header  X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header  X-Forwarded-Protocol $scheme;
+        proxy_http_version                  1.1;
+        proxy_pass_request_headers          on;
+        proxy_set_header                    Connection "";
+    }
+
+    access_log /dev/stdout nhc;
+    error_log stderr info;
+
+}

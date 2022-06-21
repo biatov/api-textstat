@@ -1,0 +1,70 @@
+version: "3"
+
+services:
+
+  postgres:
+    image: postgres:latest
+    container_name: textstat-postgres
+    hostname: postgres
+    restart: "always"
+    networks:
+      - textstat
+    volumes:
+      - postgres:${POSTGRES_DATA}
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    env_file: .env
+
+  app:
+    build:
+      context: .
+    image: ${SERVICE_IMAGE}
+    container_name: textstat-app
+    user: root
+    hostname: textstat
+    restart: "always"
+    volumes:
+      - files:/var/app/files
+      - ./:/var/app
+    networks:
+      - textstat
+    depends_on:
+      - postgres
+    entrypoint: sh ./scripts/build.sh
+    env_file: .env
+
+  nginx:
+    image: nginx:latest
+    container_name: "textstat-nginx"
+    hostname: nginx
+    restart: "always"
+    volumes:
+      - ./scripts:/tmp/scripts
+    command: /bin/bash -c "bash /tmp/scripts/subst_nginx.sh;  exec nginx -g 'daemon off;'"
+    networks:
+      - textstat
+    ports:
+      - ${NGINX_PORT}:${APP_PORT}
+    depends_on:
+      - app
+    env_file: .env
+
+#  rabbitmq:
+#      image: rabbitmq:latest
+#      hostname: rabbitmq
+#      restart: "always"
+#      networks:
+#        - textstat
+#      depends_on:
+#        - app
+#      ports:
+#        - ${RABBITMQ_PORT}:${RABBITMQ_PORT}
+#      env_file: .app.env
+
+networks:
+  textstat:
+    driver: bridge
+
+volumes:
+  postgres:
+  files:

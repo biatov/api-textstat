@@ -1,8 +1,17 @@
+import os
 import secrets
 from functools import lru_cache
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import AnyHttpUrl, BaseSettings, EmailStr, PostgresDsn, validator
+
+
+def assemble_value(v: Union[str, List[str]]) -> Union[List[str], str]:
+    if isinstance(v, str) and not v.startswith("["):
+        return [i.strip() for i in v.split(",")]
+    elif isinstance(v, (list, str)):
+        return v
+    raise ValueError(v)
 
 
 class Settings(BaseSettings):
@@ -12,35 +21,43 @@ class Settings(BaseSettings):
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000", \
     # "http://localhost:8080", "http://local.dockertoolbox.tiangolo.com"]'
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+    BACKEND_CORS_ORIGINS: Union[List[AnyHttpUrl], AnyHttpUrl] = []
 
-    @validator("BACKEND_CORS_ORIGINS", pre=True)
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
-            return v
-        raise ValueError(v)
+    _assemble_cors_origin = validator("BACKEND_CORS_ORIGINS", allow_reuse=True)(assemble_value)
 
-    PROJECT_NAME: str = 'API TextStat'
+    PROJECT_NAME: str = "API TextStat"
 
-    POSTGRES_SERVER: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
-    SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
+    POSTGRES_HOSTNAME: str = "postgres"
+    POSTGRES_PORT: str = 5432
+    POSTGRES_USER: str = "test"
+    POSTGRES_PASSWORD: str = "test"
+    POSTGRES_DB: str = "test"
+
+    SQLALCHEMY_DATABASE_URI: Optional[str]
+    DATABASE_ENGINE_POOL_SIZE: Optional[int] = 20
+    DATABASE_ENGINE_MAX_OVERFLOW: Optional[int] = 0
 
     @validator("SQLALCHEMY_DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
         if isinstance(v, str):
             return v
+        port = values.get('POSTGRES_PORT') or 5432
         return PostgresDsn.build(
-            scheme="postgresql",
+            scheme="postgresql+psycopg2",
             user=values.get("POSTGRES_USER"),
             password=values.get("POSTGRES_PASSWORD"),
-            host=values.get("POSTGRES_SERVER"),
+            host=values.get("POSTGRES_HOSTNAME"),
+            port=str(port),
             path=f"/{values.get('POSTGRES_DB') or ''}",
         )
+
+    # FILE_CONTENT_TYPES: str = "text/plain"
+    FILE_CONTENT_TYPES: Union[List[str], str] = ["text/plain"]
+    # chunk size async for reading files
+    FILE_CHUNK_SIZE: int = 2048
+    FILE_OUT_PATH: str = os.path.abspath("files")
+
+    _assemble_file_types = validator("FILE_CONTENT_TYPES", allow_reuse=True)(assemble_value)
 
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
