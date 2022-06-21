@@ -1,8 +1,7 @@
 import errno
 import os
-from typing import Optional, Union
 
-from fastapi import UploadFile, File, HTTPException, status, Path
+from fastapi import UploadFile, File, HTTPException, status
 
 from app.core.config import settings
 
