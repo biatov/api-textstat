@@ -1,12 +1,26 @@
+import errno
 import os
+from typing import Optional, Union
 
-from fastapi import UploadFile, File, HTTPException, status
+from fastapi import UploadFile, File, HTTPException, status, Path
 
 from app.core.config import settings
 
 
 def check_files_path() -> None:
-    os.makedirs(settings.FILE_OUT_PATH, exist_ok=True)
+    check_file_path(path=settings.FILE_OUT_PATH)
+
+
+def check_file_path(path: str) -> None:
+    if os.path.exists(path):
+        return None
+    try:
+        os.makedirs(os.path.dirname(path))
+    except FileNotFoundError:
+        return None
+    except OSError as exc:  # Guard against race condition
+        if exc.errno != errno.EEXIST:
+            raise exc
 
 
 def validate_content_type(file: UploadFile = File(alias="Text")) -> UploadFile:

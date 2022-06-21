@@ -8,11 +8,11 @@ from app.core.config import settings
 from app.db.session import SessionLocal
 
 from .crud import text as crud_text, stat
-from .utils import generate_internal_name, get_file_extension, read_text
+from .utils import generate_internal_name, get_file_extension, read_text, get_text_path, remove_file
 from .schemas import TextCreate, TextBase, StatCreate, StatUpdate, StatValueEnum, ArgumentParamEnum, LangEnum
 
 
-def save_file(db: Session, file: UploadFile) -> TextBase:
+def save_file(db: Session, file: UploadFile, user_id: int) -> TextBase:
     internal_name = generate_internal_name()
     extension = get_file_extension(file.filename)
     text_in = TextCreate(
@@ -21,13 +21,21 @@ def save_file(db: Session, file: UploadFile) -> TextBase:
         content_type=file.content_type,
         extension=extension,
     )
-    text_db = crud_text.create(db=db, obj_in=text_in)
+    text_db = crud_text.create_with_owner(db=db, obj_in=text_in, owner_id=user_id)
 
-    path = f"{settings.FILE_OUT_PATH}/{internal_name}.{extension}"
+    path = f"{settings.FILE_OUT_PATH}/{user_id}/{internal_name}.{extension}"
     content = file.file.read().decode()
     from .tasks import upload_file_task  # noqa
     upload_file_task(path=path, content=content)
     return text_db
+
+
+def remove_text(text_id: str) -> TextBase:
+    db = SessionLocal()
+    path = get_text_path(db=db, text_id=text_id)
+    text = crud_text.remove(db=db, id=text_id)
+    remove_file(path=path)
+    return text
 
 
 def save_stats(text_id: str, arguments: List[dict]) -> None:

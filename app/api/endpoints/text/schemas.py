@@ -70,7 +70,7 @@ class TextRead(TextCreate):
     updated_at: datetime.datetime
 
 
-class TextStats(BaseSchema):
+class TextStats(TextRead):
     stats: Optional[List[StatBase]]
 
 

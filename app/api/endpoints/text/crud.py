@@ -27,6 +27,11 @@ class CRUDText(CRUDBase[Text, TextCreate, TextUpdate]):
         db.refresh(db_obj)
         return db_obj
 
+    def get_by_owner(
+            self, db: Session, *, id: int, owner_id: int
+    ) -> Text:
+        return db.query(self.model).filter(self.model.id == id, self.model.owner_id == owner_id).first()
+
     def get_multi_by_owner(
         self, db: Session, *, owner_id: int, skip: int = 0, limit: int = 100
     ) -> List[Text]:

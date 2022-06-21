@@ -4,7 +4,7 @@ from app.core.celery import celery_app
 from app.core.config import settings
 
 from .utils import upload_file
-from .services import save_stats
+from .services import save_stats, remove_text
 
 
 @celery_app.task(queue=settings.CELERY_MAIN_QUEUE)
@@ -29,3 +29,15 @@ def save_stats_task(text_id: str, arguments: List[dict]):
         save_stats_queue.delay(text_id=text_id, arguments=arguments)
     else:
         save_stats(text_id=text_id, arguments=arguments)
+
+
+@celery_app.task(queue=settings.CELERY_MAIN_QUEUE)
+def remove_text_queue(text_id: str):
+    remove_text(text_id=text_id)
+
+
+def remove_text_task(text_id: str):
+    if settings.CREATE_TASKS:
+        remove_text_queue.delay(text_id=text_id)
+    else:
+        remove_text(text_id=text_id)
