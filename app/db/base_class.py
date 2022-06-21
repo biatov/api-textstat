@@ -12,7 +12,7 @@ def resolve_table_name(name):
 
 @as_declarative()
 class Base:
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
 
     __name__: str
 

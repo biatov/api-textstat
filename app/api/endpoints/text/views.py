@@ -3,6 +3,8 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, Path, status
 from sqlalchemy.orm import Session
 
+from app.api.endpoints.user.models import User
+from app.api.endpoints.user.deps import get_current_active_user
 from app.db.session import get_db
 
 from .deps import check_files_path, validate_content_type
@@ -22,6 +24,7 @@ router = APIRouter()
 async def upload_text(
         db: Session = Depends(get_db),
         file: UploadFile = Depends(validate_content_type),
+        current_user: User = Depends(get_current_active_user),
 ):
     text_db = save_file(db=db, file=file)
     return text_db
@@ -32,6 +35,7 @@ def get_texts(
         db: Session = Depends(get_db),
         skip: int = 0,
         limit: int = 100,
+        current_user: User = Depends(get_current_active_user),
 ):
     return crud_text.get_multi(db, skip=skip, limit=limit)
 
@@ -40,6 +44,7 @@ def get_texts(
 def get_stats(
         text_id: str = Path(None, alias="TextID"),
         db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_active_user),
 ):
     text_db = crud_text.get(db=db, id=text_id)
     if not text_db:
@@ -60,6 +65,7 @@ async def save_text_stats(
         text_id: str = Path(None, alias="TextID"),
         arguments: List[StatArgument],
         db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_active_user),
 ):
     text_db = crud_text.get(db=db, id=text_id)
     if not text_db:

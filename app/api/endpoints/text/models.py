@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Float, ForeignKey, Enum as SQLAlchemyEnum
+from sqlalchemy import Column, String, Float, ForeignKey, Enum as SQLAlchemyEnum, Integer
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship
 
@@ -13,6 +13,8 @@ class Text(Base, TimeStampMixin):
     content_type = Column(String, nullable=True)
     extension = Column(String, nullable=False)
 
+    owner_id = Column(Integer, ForeignKey("user.id"))
+    owner = relationship("User", back_populates="texts")
     stats = relationship("Stat", back_populates="text")
 
 

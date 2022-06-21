@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     _assemble_cors_origin = validator("BACKEND_CORS_ORIGINS", allow_reuse=True)(assemble_value)
 
     PROJECT_NAME: str = "API TextStat"
+    SERVER_HOST: AnyHttpUrl = "http://localhost"
 
     POSTGRES_HOSTNAME: str = "postgres"
     POSTGRES_PORT: str = 5432
@@ -66,10 +67,28 @@ class Settings(BaseSettings):
 
     _assemble_accept_content = validator("CELERY_ACCEPT_CONTENT", allow_reuse=True)(assemble_value)
 
-
-    FIRST_SUPERUSER: EmailStr
-    FIRST_SUPERUSER_PASSWORD: str
+    EMAIL_TEST_USER: EmailStr = "test@example.com"  # type: ignore
+    FIRST_SUPERUSER: EmailStr = "user@test.com"
+    FIRST_SUPERUSER_PASSWORD: str = "Qweqwe123."
     USERS_OPEN_REGISTRATION: bool = False
+
+    SMTP_TLS: bool = True
+    SMTP_PORT: Optional[int] = 587
+    SMTP_HOST: Optional[str] = "smtp.elasticemail.com"
+    SMTP_USER: Optional[str] = "testapitextstats@gmail.com"
+    SMTP_PASSWORD: Optional[str] = "E02AFC763CFAA24211968BC99FB86F1AE525"
+    EMAILS_FROM_EMAIL: Optional[EmailStr] = "testapitextstats@gmail.com"
+    EMAILS_FROM_NAME: Optional[str] = "TextStat"
+
+    @validator("EMAILS_FROM_NAME")
+    def get_project_name(cls, v: Optional[str], values: Dict[str, Any]) -> str:
+        if not v:
+            return values["PROJECT_NAME"]
+        return v
+
+    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
+    EMAIL_TEMPLATES_DIR: str = os.path.abspath("app/email-templates/build")
+    EMAILS_ENABLED: bool = True
 
     class Config:
         case_sensitive = True
