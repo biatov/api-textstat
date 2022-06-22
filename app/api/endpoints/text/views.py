@@ -29,6 +29,11 @@ async def upload_text(
         file: UploadFile = Depends(validate_content_type),
         current_user: User = Depends(get_current_active_user),
 ):
+    """
+    Upload file with text.
+    Allowed type of files:
+    * *.txt
+    """
     text_db = save_file(db=db, file=file, user_id=current_user.id)
     return text_db
 
@@ -40,6 +45,9 @@ def get_texts(
         limit: int = 100,
         current_user: User = Depends(get_current_active_user),
 ):
+    """
+    Get list of texts.
+    """
     if crud_user.is_superuser(current_user):
         return crud_text.get_multi(db, skip=skip, limit=limit)
     return crud_text.get_multi_by_owner(db, owner_id=current_user.id, skip=skip, limit=limit)
@@ -51,6 +59,9 @@ def get_stats(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_active_user),
 ):
+    """
+    Get text statistic after saving stats (__POST__: _/Text/{TextID}_ with some data).
+    """
     if crud_user.is_superuser(current_user):
         text_db = crud_text.get(db=db, id=text_id)
     else:
@@ -75,6 +86,29 @@ async def save_text_stats(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_active_user),
 ):
+    """
+    Allowed __"name"__ field:
+    * flesch_reading_ease
+    * wiener_sachtextformel
+        * __"argument.name"__ _"variant"_ (required)
+        * __"argument.value"__ as an integer between 1 and 4
+    * syllable_count
+    * lexicon_count
+        * __"argument.name"__ _"removepunct"_ (optional)
+        * __"argument.value"__ as a bool
+    * sentence_count
+    * char_count
+        * __"argument.name"__ _"ignore_spaces"_ (optional)
+        * __"argument.value"__ as a bool
+    * letter_count
+        * __"argument.name"__ _"ignore_spaces"_ (optional)
+        * __"argument.value"__ as a bool
+    * polysyllabcount
+    * monosyllabcount
+
+    Allowed __"lang"__ field:
+    * en, de, es, fr, it, nl, pl, ru
+    """
     if crud_user.is_superuser(current_user):
         text_db = crud_text.get(db=db, id=text_id)
     else:
@@ -96,6 +130,9 @@ def delete_text(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_active_user),
 ) -> TextRead:
+    """
+    Remove text with statistics.
+    """
     text = crud_text.get(db=db, id=text_id)
     if not text:
         raise HTTPException(status_code=404, detail="Text not found")
