@@ -61,8 +61,11 @@ class TextCreate(TextBase):
     extension: str
 
 
-class TextUpdate(TextBase):
-    internal_name: Optional[str]
+class TextUpdate(TextCreate):
+    id: Optional[str]
+    name: Optional[str]
+    content_type: Optional[str]
+    extension: Optional[str]
 
 
 class TextRead(TextCreate):
