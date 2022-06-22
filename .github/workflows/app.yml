@@ -41,4 +41,5 @@ jobs:
         SQLALCHEMY_DATABASE_URI: postgresql://test:test@localhost/test
         CREATE_TASKS: False
         EMAILS_ENABLED: False
+        ENV: test
       run: pytest

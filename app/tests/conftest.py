@@ -1,4 +1,5 @@
 from typing import Dict, Generator
+import shutil
 
 import pytest
 from fastapi.testclient import TestClient
@@ -35,3 +36,9 @@ def normal_user_token_headers(client: TestClient, db: Session) -> Dict[str, str]
     return authentication_token_from_email(
         client=client, email=settings.EMAIL_TEST_USER, db=db
     )
+
+
+@pytest.yield_fixture(autouse=True, scope="module")
+def run_around_tests():
+    if settings.ENV == 'test':
+        shutil.rmtree(f"{settings.FILE_OUT_PATH}/{settings.ENV}", ignore_errors=True)
