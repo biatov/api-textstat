@@ -38,7 +38,7 @@ def normal_user_token_headers(client: TestClient, db: Session) -> Dict[str, str]
     )
 
 
-@pytest.yield_fixture(autouse=True, scope="module")
-def run_around_tests():
+@pytest.fixture(autouse=True, scope="module")
+def remove_test_files():
     if settings.ENV == 'test':
         shutil.rmtree(f"{settings.FILE_OUT_PATH}/{settings.ENV}", ignore_errors=True)
