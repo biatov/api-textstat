@@ -1,4 +1,3 @@
-from os import environ
 from typing import Dict, Generator
 
 import pytest
@@ -6,18 +5,13 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.db.init_db import init_db
 from app.db.session import SessionLocal
 from app.main import api
 from app.tests.utils.user import authentication_token_from_email
 from app.tests.utils.utils import get_superuser_token_headers
 
-
-# set test config
-environ["DATABASE_CREDENTIALS"] = "postgres:dispatch"
-environ["POSTGRES_HOSTNAME"] = "localhost"
-environ["POSTGRES_DB"] = "test"
-environ["CREATE_TASKS"] = "False"
-environ["EMAILS_ENABLED"] = "False"
+init_db()
 
 
 @pytest.fixture(scope="session")
