@@ -30,6 +30,7 @@ Generate a backend using Python, including interactive API documentation.
     * SendGrid
     * ...any other provider that can generate standard SMTP credentials.
 * **Nginx** integration, including Let's Encrypt **HTTPS** certificates automatic generation.
+* GitHub CI (continuous integration).
 
 ## How to use it
 
