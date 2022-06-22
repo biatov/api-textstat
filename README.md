@@ -37,7 +37,7 @@ Generate a backend using Python, including interactive API documentation.
 Go to the directory where you want to create your project and run:
 
 ```bash
-cp .env.example .env.txt
+cp .env.example .env
 ```
 
 ## How to deploy
