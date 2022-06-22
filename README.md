@@ -17,6 +17,8 @@ Generate a backend using Python, including interactive API documentation.
     * **Robust**: Get production-ready code. With automatic interactive documentation.
     * **Standards-based**: Based on (and fully compatible with) the open standards for APIs: <a href="https://github.com/OAI/OpenAPI-Specification" target="_blank">OpenAPI</a> and <a href="http://json-schema.org/" target="_blank">JSON Schema</a>.
     * [**Many other features**](https://github.com/tiangolo/fastapi) including automatic validation, serialization, interactive documentation, authentication with OAuth2 JWT tokens, etc.
+* **SQLAlchemy** models.
+* **Alembic** migrations.
 * **Secure password** hashing by default.
 * **JWT token** authentication.
 * **CORS** (Cross Origin Resource Sharing).
