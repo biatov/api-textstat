@@ -42,4 +42,4 @@ jobs:
         CREATE_TASKS: False
         EMAILS_ENABLED: False
         ENV: test
-      run: pytest
+      run: pytest --cov
