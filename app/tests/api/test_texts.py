@@ -5,21 +5,6 @@ from app.tests.utils.text import create_random_text, get_text_db
 from app.tests.utils.utils import file_data, random_content_type, random_filename
 
 
-def test_upload_text(
-    client: TestClient, superuser_token_headers: dict, db: Session
-) -> None:
-    content_type = random_content_type()
-    file = file_data()
-    filename = random_filename()
-    data = {"Text": (filename, file, content_type)}
-    response = client.post(
-        "Text/", files=data, headers=superuser_token_headers,
-    )
-    assert response.status_code == 200
-    content = response.json()
-    assert "id" in content
-
-
 def test_read_texts(
     client: TestClient, superuser_token_headers: dict, db: Session
 ) -> None:
@@ -35,6 +20,21 @@ def test_read_texts(
     assert text_resp["name"] == text.name
     assert text_resp["content_type"] == text.content_type
     assert text_resp["extension"] == text.extension
+
+
+def test_upload_text(
+    client: TestClient, superuser_token_headers: dict, db: Session
+) -> None:
+    content_type = random_content_type()
+    file = file_data()
+    filename = random_filename()
+    data = {"Text": (filename, file, content_type)}
+    response = client.post(
+        "Text/", files=data, headers=superuser_token_headers,
+    )
+    assert response.status_code == 200
+    content = response.json()
+    assert "id" in content
 
 
 def test_read_text(
