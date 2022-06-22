@@ -7,6 +7,13 @@ from pydantic import validator, root_validator
 from app.db.schemas import BaseSchema
 
 
+override_arguments = {
+    "char_count": "character_count",
+    "polysyllabcount": "polysyllable_count",
+    "monosyllabcount": "mono_syllable_count",
+}
+
+
 class LangEnum(str, enum.Enum):
     en = "en"
     de = "de"
@@ -113,6 +120,10 @@ class StatArgument(BaseSchema):
     name: StatValueEnum
     lang: Optional[LangEnum] = LangEnum.en
     argument: Optional[StatArgumentParam]
+
+    @validator("name", pre=True)
+    def set_name(cls, v):
+        return override_arguments.get(v, v)
 
     @validator("argument", pre=True)
     def argument_as_required(cls, v: Optional[dict], values: dict) -> dict:
