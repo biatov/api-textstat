@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, Float, ForeignKey, Enum as SQLAlchemyEnum
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship
 
-from app.api.endpoints.text.schemas import StatValueEnum, LangEnum
+from app.api.endpoints.text.schemas import LangEnum
 from app.db.models import TimeStampMixin
 from app.db.base import Base
 
@@ -19,7 +19,7 @@ class Text(Base, TimeStampMixin):
 
 
 class Stat(Base):
-    name = Column(SQLAlchemyEnum(StatValueEnum))
+    name = Column(String)
     value = Column(Float)
     argument = Column(JSON, nullable=True)
     lang = Column(SQLAlchemyEnum(LangEnum), default=LangEnum.en)
