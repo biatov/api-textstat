@@ -61,7 +61,7 @@ def calculate_stat(text: str, arguments: dict) -> Union[float, int, None]:
     func_args = arguments.get("argument") or {}
     arg_name = func_args.get("name")
     arg_value = func_args.get("value")
-    if arg_name and arg_value:
+    if arg_name and arg_value is not None:
         func_kwargs[ArgumentParamEnum(arg_name).value] = arg_value
     textstat.set_lang(lang=lang)  # noqa
     return func(**func_kwargs)

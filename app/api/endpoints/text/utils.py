@@ -50,7 +50,7 @@ def get_text_path(db: Session, text_id: str) -> str:
     text_db: Text = text.get(db=db, id=text_id)
     if not text_db:
         return ""
-    return f"{settings.FILE_OUT_PATH}/{settings.ENV}/{text_db.owner_id}/{text_db.id}.{text_db.extension}"
+    return generate_file_path(user_id=text_db.owner_id, text_id=text_id, extension=text_db.extension)
 
 
 def generate_file_path(user_id: int, text_id: str, extension: str) -> str:

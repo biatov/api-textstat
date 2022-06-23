@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -53,7 +53,12 @@ def test_token(current_user: models.User = Depends(deps.get_current_user)) -> An
 
 
 @router.post("/password-recovery/{email}", response_model=Msg)
-def recover_password(email: str, db: Session = Depends(get_db)) -> Any:
+def recover_password(
+    *,
+    email: str,
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks,
+) -> Any:
     """
     Password Recovery
     """
@@ -65,8 +70,8 @@ def recover_password(email: str, db: Session = Depends(get_db)) -> Any:
             detail="The user with this username does not exist in the system.",
         )
     password_reset_token = generate_password_reset_token(email=email)
-    send_reset_password_email(
-        email_to=user.email, email=email, token=password_reset_token
+    background_tasks.add_task(
+        send_reset_password_email, email_to=user.email, email=email, token=password_reset_token
     )
     return {"msg": "Password recovery email sent"}
 
