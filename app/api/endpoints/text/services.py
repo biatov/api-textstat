@@ -54,7 +54,7 @@ def save_stats(text_id: str, arguments: List[dict]) -> None:
 def calculate_stat(text: str, arguments: dict) -> Union[float, int, None]:
     lang: LangEnum = arguments.get("lang") or LangEnum.en
     callback = StatValueEnum(arguments.get("name"))
-    func = getattr(textstat, callback.name, None)
+    func = getattr(textstat, callback.value, None)
     if not callable(func):
         return None
     func_kwargs = {"text": text}

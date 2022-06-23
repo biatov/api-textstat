@@ -7,13 +7,6 @@ from pydantic import validator, root_validator
 from app.db.schemas import BaseSchema
 
 
-override_arguments = {
-    "char_count": "character_count",
-    "polysyllabcount": "polysyllable_count",
-    "monosyllabcount": "mono_syllable_count",
-}
-
-
 class LangEnum(str, enum.Enum):
     en = "en"
     de = "de"
@@ -31,10 +24,10 @@ class StatValueEnum(str, enum.Enum):
     syllable_count = "syllable_count"  # -> int
     lexicon_count = "lexicon_count"  # removepunct: bool (True) -> int
     sentence_count = "sentence_count"  # -> int
-    char_count = "character_count"  # ignore_spaces: bool (True) -> int
+    character_count = "char_count"  # ignore_spaces: bool (True) -> int
     letter_count = "letter_count"  # ignore_spaces: bool (True) -> int
-    polysyllabcount = "polysyllable_count"  # int
-    monosyllabcount = "mono_syllable_count"  # int
+    polysyllable_count = "polysyllabcount"  # int
+    mono_syllable_count = "monosyllabcount"  # int
 
 
 class ArgumentParamEnum(str, enum.Enum):
@@ -121,10 +114,6 @@ class StatArgument(BaseSchema):
     lang: Optional[LangEnum] = LangEnum.en
     argument: Optional[StatArgumentParam]
 
-    @validator("name", pre=True)
-    def set_name(cls, v):
-        return override_arguments.get(v, v)
-
     @validator("argument", pre=True)
     def argument_as_required(cls, v: Optional[dict], values: dict) -> dict:
         name = values.get("name")
@@ -143,7 +132,7 @@ class StatArgument(BaseSchema):
         elif name != StatValueEnum.lexicon_count and argument_name == ArgumentParamEnum.removepunct:
             cls.is_not_allowed(ArgumentParamEnum.removepunct)
         elif (
-                name not in (StatValueEnum.char_count, StatValueEnum.letter_count) and
+                name not in (StatValueEnum.character_count, StatValueEnum.letter_count) and
                 argument_name == ArgumentParamEnum.ignore_spaces
         ):
             cls.is_not_allowed(ArgumentParamEnum.ignore_spaces)
